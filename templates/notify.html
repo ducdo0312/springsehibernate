@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thông báo</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+    <script src="/webjars/sockjs-client/sockjs.js"></script>
+    <script src="/webjars/stomp-websocket/stomp.js"></script>
+    <script src="/webjars/stomp.js/2.3.3/stomp.js"></script>
+
+    <link rel="stylesheet" href="/css/home_style.css">
+    <link rel="stylesheet" href="/assets/font/themify-icons/themify-icons.css">
+
+</head>
+<body>
+<script src="/js/home.js">
+</script>
+<div id="main">
+    <!-- Include Navbar Fragment -->
+    <div th:replace="fragments/navbar :: navbar"></div>
+
+    <div id = "content">
+        <div id="currentNav"></div>
+        <div class="main-page">
+            <div class="header-section">
+                <div class="name-header">
+                    <h5 style="color: #083761">Thông báo</h5>
+                </div>
+            </div>
+            <div class="content-section">
+                <ul>
+<!--                    <th:block th:each="notification : ${notifications}">-->
+<!--                        <li th:text="${notification.content}"></li>-->
+<!--                    </th:block>-->
+
+                    <li class="listMessage" th:each="notification : ${notifications}">
+                        <div  class="NotificationList">
+                            <p Class="Title-Topic" th:text="${notification.content}"></p>
+                            <p class="Time-send" th:text="${#dates.format(T(java.util.Date).from(notification.createdAt.atZone(T(java.time.ZoneId).systemDefault()).toInstant()), 'dd/MM/yyyy HH:mm')}"></p>
+                        </div>
+
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+
+</html>

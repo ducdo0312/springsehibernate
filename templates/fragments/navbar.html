@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Navbar Fragment</title>
+    <link rel="stylesheet" href="/css/home_style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="/assets/font/themify-icons/themify-icons.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/css/home_style.css">
+
+</head>
+<body>
+<script src="/js/home.js">
+</script>
+<div id="main">
+    <div id="header" th:fragment="navbar">
+        <ul id="nav">
+            <li class="logo">
+                    <img src="/assets/img/output-onlinepngtools.png">
+                <a th:href="@{/home}"
+                        style="color: white">UET Quản lý đồ án</a>
+            </li>
+            <li><a th:href="@{/home}">Tin tức</a></li>
+            <li th:if="${#lists.contains(roles, 'ROLE_Khoa')}" class="dropdown">
+                <a href="javascript:void(0)">Quản lý</a>
+                <div class="dropdown-content">
+                    <div class="dropdown-subnav">
+                        <a href="javascript:void(0)">Quản lý sinh viên</a>
+                        <div class="dropdown-subnav-content">
+                            <a th:href="@{/khoa/upload}">Thêm danh sách</a>
+                            <a th:href="@{/khoa/upload-success}">Danh sách xác nhận</a>
+                        </div>
+                    </div>
+                    <div class="dropdown-subnav">
+                        <a href="javascript:void(0)">Quản lý bộ môn</a>
+                        <div class="dropdown-subnav-content">
+                            <a th:href="@{/khoa}">Quản lý danh sách gửi</a>
+                            <a th:href="@{/khoa/register}">Đăng ký bộ môn mới</a>
+                            <a th:href="@{'/khoa/'+ ${accountId}}">Danh sách bộ môn</a>
+                        </div>
+                    </div>
+                    <a th:href="@{/khoa/TimePhase}">Thiết lập</a>
+
+                </div>
+            </li>
+            <li th:if="${#lists.contains(roles, 'ROLE_BoMon')}" class="dropdown">
+                <a href="javascript:void(0)">Quản lý</a>
+                <div class="dropdown-content">
+                    <div class="dropdown-subnav">
+                        <a th:href="@{/bo-mon/register}">Đăng ký giảng viên</a>
+                        <a th:href="@{/bo-mon}">Quản lý danh sách gửi</a>
+                        <a th:href="@{'/bo-mon/'+ ${accountId}}">Danh sách giảng viên</a>
+                    </div>
+                    <!-- Các mục menu khác của ROLE_BoMon -->
+                </div>
+            </li>
+
+            <li th:if="${#lists.contains(roles, 'ROLE_GiangVien')}"><a th:href="@{/students}">Quản lý</a></li>
+            <li><a th:href="@{'/notify/' + ${accountId}}">Thông báo</a></li>
+        </ul>
+        <!-- Begin: Account button-->
+        <div class="Account-btn">
+            <!-- <i class="Account-icon ti-face-smile"></i> -->
+            <p style=" display: inline-block; color: white; margin-top: 6px; margin-bottom: 0" th:text="${realname}"></p>
+            <div class="avatar-container">
+                <img src="/assets/img/avatar2.png" id="avatar-img" style="height: 50px; display: inline-block;">
+                <div class="account-menu">
+                    <div class="menu-header">
+                        <img src="/assets/img/avatar2.png" class="menu-avatar" style="height: 50px;">
+                        <p style="margin-bottom: 0" th:text="${realname}"></p>
+                    </div>
+                    <div class="content-menu">
+                        <a href="/profile">Tài khoản</a>
+                        <form th:action="@{/logout}" method="post">
+                            <input type="submit" value="Sign Out"/>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <i style="color: white" class="ti-angle-down"></i>
+            <i style="color:white;" class="ti-angle-up"></i>
+        </div>
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                var avatarImg = document.querySelector('.Account-btn');
+                var menu = document.querySelector('.account-menu');
+                var iconDown = document.querySelector('.ti-angle-down');
+                var iconUp = document.querySelector('.ti-angle-up');
+
+                avatarImg.addEventListener('click', function() {
+                    var isMenuVisible = menu.style.display === 'block';
+                    menu.style.display = isMenuVisible ? 'none' : 'block';
+
+                    // Chuyển đổi icon dựa trên trạng thái của menu
+                    iconDown.style.display = isMenuVisible ? 'block' : 'none';
+                    iconUp.style.display = isMenuVisible ? 'none' : 'block';
+
+                    if (isMenuVisible) {
+                        iconDown.style.animationName = 'fadeIn';
+                        iconUp.style.animationName = 'fadeOut';
+                    } else {
+                        iconDown.style.animationName = 'fadeOut';
+                        iconUp.style.animationName = 'fadeIn';
+                    }
+                    event.stopPropagation(); // Ngăn chặn sự kiện nổi bọt
+                });
+
+                // Xử lý sự kiện nhấp chuột trên toàn màn hình
+                document.addEventListener('click', function(event) {
+                    if (menu.style.display === 'block' && event.target !== avatarImg) {
+                        menu.style.display = 'none';
+                        iconDown.style.animationName = 'fadeIn';
+                        iconUp.style.animationName = 'fadeOut';
+                        iconDown.style.display = 'block';
+                        iconUp.style.display = 'none';
+                    }
+                });
+            });
+
+
+        </script>
+
+
+        <!-- End: Account Button-->
+    </div>
+</div>
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.1.6/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+
+</html>

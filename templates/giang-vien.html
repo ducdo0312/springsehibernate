@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>giangvien</title>
+    <link rel="stylesheet" href="/css/home_style.css">
+    <link rel="stylesheet" href="/assets/font/themify-icons/themify-icons.css">
+
+
+</head>
+<body>
+<script src="/js/home.js">
+</script>
+<div id="main">
+    <div th:fragment="navbar" id="header">
+        <!-- Begin: NAV -->
+        <ul id="nav">
+            <li><a href="">Logo</a></li>
+            <li><a th:href="@{/home}">Home</a></li>
+            <!--            <li><a th:href="@{/students}">Student Management</a></li>-->
+            <li th:if="${#lists.contains(roles, 'ROLE_Khoa')}">
+                <a th:href="@{/khoa}">Subject Management</a>
+            </li>
+            <li th:if="${#lists.contains(roles, 'ROLE_BoMon')}">
+                <a th:href="@{/bo-mon}">Lecturer Management</a>
+            </li>
+            <li th:if="${#lists.contains(roles, 'ROLE_GiangVien')}">
+                <a th:href="@{/students}">Student Management</a>
+            </li>
+            <li><a th:href="@{/notify}">Notification</a></li>
+        </ul>
+        <!-- End: NAV -->
+
+        <!-- Begin: Account button-->
+        <div class="Account-btn">
+            <!-- <i class="Account-icon ti-face-smile"></i> -->
+            <p style=" display: inline-block; color: white; margin-top: 6px;">Giang Vien</p>
+            <img src="/assets/img/avatar2.png" class="avatar-img" style="height: 40px; display: inline-block;">
+        </div>
+        <!-- End: Account Button-->
+    </div>
+
+    <div id = "content">
+        <div id="currentNav"></div>
+        <div class="main-page">
+            <div class="header-section">
+                <div class="name-header">
+                </div>
+            </div>
+            <div class="content-section">
+
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+
+</html>

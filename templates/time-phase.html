@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý giai đoạn</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <link rel="stylesheet" href="/css/home_style.css">
+    <link rel="stylesheet" href="/assets/font/themify-icons/themify-icons.css">
+
+
+</head>
+<body>
+<script src="/js/home.js">
+</script>
+<div id="main">
+    <!-- Include Navbar Fragment -->
+    <div th:replace="fragments/navbar :: navbar"></div>
+
+    <div id = "content">
+        <div id="currentNav"></div>
+        <div class="main-page">
+            <div th:if="${toastMessage}" class="toast" role="alert" aria-live="assertive" aria-atomic="true" data-autohide="false" style="position: fixed;
+         top: 60px; right: 20px;min-width: 300px; min-height: 90px">
+                <div class="toast-header">
+                    <strong class="mr-auto">Thông báo</strong>
+                    <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="toast-body">
+                    <span th:text="${toastMessage}"></span>
+                </div>
+            </div>
+
+            <div class="header-section" style="color: #083761">
+                <h4 th:if="${!exists}">Bảng giai đoạn</h4>
+            </div>
+            <div class="content-section" style="display: flex;flex-direction: column;justify-content: center;
+            align-items: center;">
+                <div th:if="${!exists}" class="form-time-phase">
+                    <h4>Thiết lập Thời gian Giai đoạn</h4>
+                    <form action="#" th:action="@{/khoa/setTimePhase}" th:object="${timePhase}" method="post">
+                        <div>
+                            <label for="phase1Start">Bắt đầu giai đoạn 1:</label>
+                            <input type="date" th:field="*{phase1Start}" id="phase1Start" required>
+                        </div>
+                        <div>
+                            <label for="phase1End">Kết thúc giai đoạn 1:</label>
+                            <input type="date" th:field="*{phase1End}" id="phase1End" required>
+                        </div>
+                        <div>
+                            <label for="phase2Start">Bắt đầu giai đoạn 2:</label>
+                            <input type="date" th:field="*{phase2Start}" id="phase2Start" required>
+                        </div>
+                        <div>
+                            <label for="phase2End">Kết thúc giai đoạn 2:</label>
+                            <input type="date" th:field="*{phase2End}" id="phase2End" required>
+                        </div>
+                        <div>
+                            <label for="phase3Start">Bắt đầu giai đoạn 3:</label>
+                            <input type="date" th:field="*{phase3Start}" id="phase3Start" required>
+                        </div>
+                        <div>
+                            <label for="phase3End">Kết thúc giai đoạn 3:</label>
+                            <input type="date" th:field="*{phase3End}" id="phase3End" required>
+                        </div>
+                        <button type="submit">Lưu</button>
+                    </form>
+                </div>
+                <div th:if="${exists}">
+                        <div class="button-submit-confirm">
+                            <form th:action="@{/khoa/deleteTimePhases}" method="post">
+                                <button type="submit" class="btn btn-danger">Xóa</button>
+                            </form>
+                        </div>
+                    <table>
+                        <thead>
+                        <tr>
+                            <th class="custom-size-sm">STT</th>
+                            <th>Bắt đầu giai đoạn</th>
+                            <th>Kết thúc giai đoạn</th>
+                            <th>Nội dung</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="timePhase : ${timePhases}">
+                            <td class="custom-size-sm">1</td>
+                            <td th:text="${timePhase.getFormattedPhase1Start()}"></td>
+                            <td th:text="${timePhase.getFormattedPhase1End()}"></td>
+                            <td>Đăng ký đề tài đồ án</td>
+                        </tr>
+                        <tr th:each="timePhase : ${timePhases}">
+                            <td class="custom-size-sm">2</td>
+                            <td th:text="${timePhase.getFormattedPhase2Start()}"></td>
+                            <td th:text="${timePhase.getFormattedPhase2SEnd()}"></td>
+                            <td>Điều chỉnh đề tài</td>
+                        </tr>
+                        <tr th:each="timePhase : ${timePhases}">
+                            <td class="custom-size-sm">3</td>
+                            <td th:text="${timePhase.getFormattedPhase3Start()}"></td>
+                            <td th:text="${timePhase.getFormattedPhase3End()}"></td>
+                            <td>Phân công phản biện</td>
+                        </tr>
+
+
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+
+        </div>
+    </div>
+</div>
+</body>
+
+</html>

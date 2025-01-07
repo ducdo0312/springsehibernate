@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<ul id="lecturerList">
+    <li th:each="lecturer : ${suggestions}" th:text="${lecturer.name}"></li>
+</ul>
+</body>
+</html>

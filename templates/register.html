@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tạo tài khoản giảng viên mới</title>
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+
+
+    <!-- CSS for Bootstrap -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
+    <!--    Css Config-->
+    <link rel="stylesheet" href="/css/home_style.css">
+
+    <!-- jQuery library -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+    <!-- Popper JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+
+    <!-- Latest JavaScript for Bootstrap 4 -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+
+    <link rel="stylesheet" href="/assets/font/themify-icons/themify-icons.css">
+
+    <script src="/js/home.js"></script>
+</head>
+<body>
+<div id="main">
+    <!-- Include Navbar Fragment -->
+    <div th:replace="fragments/navbar :: navbar"></div>
+
+    <div id = "content">
+        <div id="currentNav"></div>
+        <div class="main-page">
+            <div class="header-section">
+                <div class="name-header">
+                    <h4 style="color: #083761">Đăng ký giảng viên mới</h4>
+                </div>
+            </div>
+            <div class="content-section">
+                <div id="message"></div>
+                <div class="signup-form-container">
+                    <form id="registerForm" class="signup-form">
+                        <h2 class="form-title">Đăng Ký</h2>
+
+                        <div class="form-group">
+                            <input type="text" id="username" name="username" placeholder="Tên Đăng Nhập" required>
+                            <span class="error-message" id="username-error"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <input type="password" id="password" name="password" placeholder="Mật Khẩu" required>
+                            <span class="error-message" id="password-error"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <input type="text" id="realname" name="realname" placeholder="Họ và tên giảng viên">
+                        </div>
+
+                        <div class="form-group">
+                            <input type="number" id="OwnerID" name="OwnerID" placeholder="Mã giảng viên" required>
+                            <span class="error-message" id="ownerId-error"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <select id="role" name="role"disabled>
+                                <option value="GiangVien">Giảng viên</option>
+                            </select>
+                        </div>
+
+                        <!-- Trường ẩn cho CSRF Token -->
+                        <input type="hidden" id="csrf" name="_csrf" value=""/>
+                        <button type="submit" class="submit-btn">Đăng Ký</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    // Hàm để kiểm tra ownerId
+    function checkOwnerId(ownerId) {
+        return fetch(`/bo-mon/checkOwnerId?ownerId=${ownerId}`)
+            .then(response => response.json())
+            .catch(error => console.error('Error:', error));
+    }
+
+    document.getElementById("registerForm").onsubmit = async function(event) {
+        event.preventDefault();
+
+        // Clear existing error messages
+        document.querySelectorAll('.error-message').forEach(function(el) {
+            el.textContent = '';
+        });
+
+
+        var isValid = true;
+        var username = document.getElementById("username").value;
+        var password = document.getElementById("password").value;
+        var ownerID = document.getElementById("OwnerID").value;
+
+        // Gọi hàm kiểm tra ownerId
+        var ownerIdExists = await checkOwnerId(ownerID);
+        if (ownerIdExists) {
+            document.getElementById("ownerId-error").textContent = "Mã giảng viên này đã tồn tại.";
+            isValid = false;
+        }
+        // Validate username
+        if (!username) {
+            document.getElementById("username-error").textContent = "Tên đăng nhập là bắt buộc.";
+            isValid = false;
+        }
+
+        // Validate password length
+        if (password.length < 8) {
+            document.getElementById("password-error").textContent = "Mật khẩu phải dài hơn 8 ký tự.";
+            isValid = false;
+        }
+
+        // Validate ownerID is a number
+        if (isNaN(ownerID)) {
+            document.getElementById("ownerid-error").textContent = "Mã giảng viên phải là số.";
+            isValid = false;
+        }
+        if (isValid) {
+            var formData = {
+                username: document.getElementById("username").value,
+                password: document.getElementById("password").value,
+                realname: document.getElementById("realname").value,
+                role: document.getElementById("role").value,
+                ownerID: document.getElementById("OwnerID").value,
+                _csrf: document.getElementById("csrf").value
+            };
+
+            var csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+            var csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
+            console.log(formData)
+            fetch('/bo-mon/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    [csrfHeader]: csrfToken // Thêm CSRF token vào header
+                },
+                body: JSON.stringify(formData),
+            })
+                .then(response => response.text())
+                .then(data => {
+                    document.getElementById("message").innerHTML = data;
+                })
+                .catch((error) => {
+                    console.error('Error:', error);
+                });
+        }
+    };
+
+</script>
+</body>
+</html>

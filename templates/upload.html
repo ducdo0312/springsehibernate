@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Danh sách sinh viên đủ điều kiện chờ xác nhận</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="/css/home_style.css">
+    <link rel="stylesheet" href="/assets/font/themify-icons/themify-icons.css">
+
+
+</head>
+<body>
+<script src="/js/home.js">
+</script>
+<div id="main">
+    <!-- Include Navbar Fragment -->
+    <div th:replace="fragments/navbar :: navbar"></div>
+
+    <div id = "content">
+        <div id="currentNav"></div>
+        <div class="main-page">
+            <div class="header-section">
+                <div class="name-header">
+                    <h4 th:if="${!graduatesPage.hasContent}">Thêm danh sách sinh viên đủ điều kiện</h4>
+                    <h4 th:if="${graduatesPage.hasContent}">Danh sách bảng chờ xác nhận</h4>
+                </div>
+            </div>
+            <div class="content-section">
+                <!-- Hiển thị thông báo từ flash attributes -->
+                <div th:if="${UploadMessage}" class="alert alert-info" th:text="${UploadMessage}">
+                    <!-- Thông báo sẽ được hiển thị ở đây -->
+                </div>
+                <!-- Hiển thị thông báo từ flash attributes -->
+                <div th:if="${SaveMessage}" class="alert alert-info" th:text="${SaveMessage}">
+                    <!-- Thông báo sẽ được hiển thị ở đây -->
+                </div>
+
+                <!-- Hiển thị thông báo từ flash attributes -->
+                <div th:if="${DeleteMessage}" class="alert alert-info" th:text="${DeleteMessage}">
+                    <!-- Thông báo sẽ được hiển thị ở đây -->
+                </div>
+                <form th:if="${!graduatesPage.hasContent}" id="uploadForm" th:action="@{/khoa/import}" method="post" enctype="multipart/form-data">
+                    <div class="form-group">
+                        <label for="file">Choose Excel file to upload (.xls, .xlsx):</label>
+                        <input type="file" id="file" name="file" accept=".xls,.xlsx" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="UploadFile_academicYear">Năm học:</label>
+                        <select id="UploadFile_academicYear" name="academicYear" required>
+                            <option value="">Chọn năm học</option>
+                            <option th:each="year : ${academicYears}" th:value="${year}" th:text="${year}"></option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="UploadFile_semester">Học kỳ:</label>
+                        <select id="UploadFile_semester" name="semester" required>
+                            <option value="">Chọn học kỳ</option>
+                            <option value="1">Kỳ 1</option>
+                            <option value="2">Kỳ 2</option>
+                            <!-- Các options khác nếu cần -->
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Upload</button>
+                </form>
+            </div>
+
+            <div th:if="${graduatesPage.hasContent}">
+                <div class="button-submit-confirm">
+                    <form th:action="@{/khoa/confirm}" method="post" onsubmit="return confirmAndSubmit()">
+                        <button type="submit" class="btn btn-primary">Xác nhận</button>
+                    </form>
+                    <form th:action="@{/khoa/delete-upload}" method="post">
+                        <button type="submit" class="btn btn-danger">Xóa</button>
+                    </form>
+                </div>
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Mã SV</th>
+                        <th>Họ và tên</th>
+                        <th>Ngày sinh</th>
+                        <th>Lớp</th>
+                        <th>TCTL</th>
+                        <th>TBC</th>
+                        <th>Năm học</th>
+                        <th>Kỳ Học</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="graduate : ${graduatesPage}">
+                        <td th:text="${graduate.studentId}"></td>
+                        <td th:text="${graduate.name}"></td>
+                        <td th:text="${graduate.dateOfBirth}"></td>
+                        <td th:text="${graduate.nameClass}"></td>
+                        <td th:text="${graduate.accumulatedCredits}"></td>
+                        <td th:text="${graduate.tbc}"></td>
+                        <td th:text="${graduate.academicYear}"></td>
+                        <td th:text="${graduate.semester}"></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <nav style="float: right" th:if="${graduatesPage.hasContent}">
+                <ul class="pagination">
+                    <li class="page-item" th:class="${!graduatesPage.first} ? '':'disabled'">
+                        <a class="page-link" th:href="@{/khoa/upload(page=${graduatesPage.number - 1})}">Trước</a>
+                    </li>
+                    <!-- Các nút phân trang số... -->
+                    <li class="page-item" th:class="${!graduatesPage.last} ? '':'disabled'">
+                        <a class="page-link" th:href="@{/khoa/upload(page=${graduatesPage.number + 1})}">Sau</a>
+                    </li>
+                </ul>
+            </nav>
+            <div>
+
+                <!-- Modal Confirmation Overwrite -->
+                <div class="modal fade" id="confirmOverwriteModal" tabindex="-1" role="dialog" aria-labelledby="overwriteModalLabel" aria-hidden="true" th:if="${confirmOverwrite}">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="overwriteModalLabel">Xác Nhận Ghi Đè</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                Danh sách sinh viên với năm học và học kỳ đã chọn đã tồn tại. Bạn có muốn thay thế danh sách cũ không?
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Không</button>
+                                <!-- Form này sẽ gửi yêu cầu đến @{/overwrite-data} để xử lý việc ghi đè dữ liệu -->
+                                <form th:action="@{/khoa/overwrite-data}" method="post" enctype="multipart/form-data">
+                                    <!-- Các trường ẩn chứa thông tin năm học và học kỳ -->
+                                    <input type="hidden" th:name="academicYear" th:value="${academicYear}" />
+                                    <input type="hidden" th:name="semester" th:value="${semester}" />
+
+                                    <!-- Identifier cho file đã tải lên để server có thể lấy file từ nơi lưu trữ tạm thời -->
+                                    <input type="hidden" th:name="fileIdentifier" th:value="${fileIdentifier}" />
+
+                                    <button type="submit" class="btn btn-primary">Có</button>
+                                </form>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Kích hoạt modal nếu confirmOverwrite là true -->
+                <script th:inline="javascript">
+                    /*<![CDATA[*/
+                    $(document).ready(function() {
+                        var confirmOverwrite = /*[[${confirmOverwrite}]]*/ false;
+                        if ([[${confirmOverwrite}]]) {
+                            $('#confirmOverwriteModal').modal('show');
+                        }
+                    });
+                    /*]]>*/
+                </script>
+
+                <!-- Modal để hiển thị ảnh phóng to -->
+                <div style="z-index: 1100" class="modal fade" id="imageModal" tabindex="-1" role="dialog" aria-labelledby="imageModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-lg" role="document">
+                        <div class="modal-content">
+                            <div class="modal-body">
+                                <img id="modalImage" src="" class="img-fluid" alt="Phóng to ảnh">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Modal hướng dẫn cách upload file-->
+                <div class="modal fade" id="uploadModal" tabindex="-1" role="dialog" aria-labelledby="uploadModalLabel" aria-hidden="true">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="uploadModalLabel">Hướng dẫn Upload File</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                               <div class="step1">
+                                   <h4>Bước 1: Định dạng file</h4>
+                                   <ul style="list-style-type: none">
+                                       <li>File gửi lên cần định dạng là file excel .xls(.xlsx)</li>
+                                       <li>Bảng cần được đặt tại Sheet 1</li>
+                                       <li>Bảng trong excel cần được đặt tại ô đầu tiên trong excel</li>
+                                       <li>Thứ tự các cột gồm Mã SV, Họ và tên, Ngày sinh, Lớp, TCTL, TBC</li>
+                                       <img src="/assets/img/Step1_UploadFile.png" alt="Bước 1" style="max-height: 30%; max-width: 100%" class="clickable-image">
+                                   </ul>
+                               </div>
+                                <div class="step2">
+                                    <h4>Bước 2:Upload File</h4>
+                                    <ul style="list-style-type: none">
+                                        <li>Sau khi chọn file thêm năm học và kỳ học muốn thêm</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+
+</html>

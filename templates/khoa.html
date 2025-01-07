@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Khoa</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
+    <link rel="stylesheet" href="/css/home_style.css">
+    <link rel="stylesheet" href="/assets/font/themify-icons/themify-icons.css">
+
+
+</head>
+<body>
+<script src="/js/home.js">
+</script>
+<div id="main">
+    <!-- Include Navbar Fragment -->
+    <div th:replace="fragments/navbar :: navbar"></div>
+
+    <div id = "content">
+        <div id="currentNav"></div>
+        <div class="main-page">
+            <div class="header-section" style="color: #083761">
+                <div class="name-header">
+                    <h4 class="listTable" th:if="${#lists.contains(roles, 'ROLE_Khoa')}">Danh sách Bộ môn</h4>
+                </div>
+            </div>
+            <div class="content-section">
+                <div>
+                    <ul>
+                        <li class="listMessage" th:each="message : ${messages}" style="color: #083761">
+                            <div  class="BoMonList" th:data-id="${message.senderId}">
+                                <p Class="Title-Topic" th:text="${message.messageContent}"></p>
+                                <p Class="Name-lecture" th:text="${message.senderName}"></p>
+                                <p class="Time-send" th:text="${#dates.format(T(java.util.Date).from(message.sentAt.atZone(T(java.time.ZoneId).systemDefault()).toInstant()), 'dd/MM/yyyy HH:mm')}"></p>
+
+
+                                <div class="button-container" style="display: flex; gap: 10px;">
+                                    <!-- Button Xác nhận -->
+                                    <form th:action="@{/khoa/list/confirm/{messageId}(messageId=${message.id})}" method="post">
+                                        <button type="submit" class="btn btn-success">Xác nhận</button>
+                                    </form>
+
+                                    <!-- Button Từ chối -->
+                                    <form th:action="@{/khoa/list/reject/{messageId}(messageId=${message.id})}" method="post">
+                                        <button type="submit" class="btn btn-danger">Từ chối</button>
+                                    </form>
+                                </div>
+                            </div>
+
+                        </li>
+                    </ul>
+                    <form th:action="@{khoa/send-confirm-list}" method="get">
+                        <button type="submit" class="btn btn-primary">Chuyển đến danh sách đã xác nhận</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+
+</html>

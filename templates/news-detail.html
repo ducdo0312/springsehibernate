@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chi tiết tin tức</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/css/home_style.css">
+    <link rel="stylesheet" href="/assets/font/themify-icons/themify-icons.css">
+
+
+</head>
+<body>
+<script src="/js/home.js">
+</script>
+<div id="main">
+    <!-- Include Navbar Fragment -->
+    <div th:replace="fragments/navbar :: navbar"></div>
+
+    <div id = "content">
+        <div id="currentNav"></div>
+        <div class="main-page">
+            <div class="header-section">
+                <div class="name-header" style="display: inline-block">
+                    <!-- Các nút chức năng nếu cần -->
+                    <a th:href="@{/home}" class="btn btn-primary">Quay lại</a>
+                    <h2 style="color: #083761" th:text="${news.title}">Tiêu đề tin tức</h2>
+                </div>
+            </div>
+            <div class="content-section">
+                <div class="news-detail" style="color: #083761">
+                    <!-- Sử dụng th:text cùng với CSS để bảo toàn xuống dòng và khoảng trắng -->
+                    <p th:text="${#dates.format(news.publishDate, 'dd/MM/yyyy HH:mm')}">Thời gian đăng</p>
+                    <p style="white-space: pre-wrap;" th:text="${news.content}">Nội dung tin tức</p>
+
+                    <!-- Kiểm tra và hiển thị file đính kèm nếu có -->
+                    <div class="file-section" th:if="${news.attachment}">
+                        <div class="title-file-section">
+                            <p>Tệp đính kèm</p>
+                        </div>
+                        <div class="content-file-section" style="display: flex; align-items: center;">
+                            <p>
+                                <!-- Sử dụng tên file như một liên kết để tải xuống -->
+                                <a th:href="@{'/home/news/download/' + ${news.id}}" th:text="${news.fileName}">filename.ext</a>
+                            </p>
+
+                            <!-- Nếu file là một hình ảnh, hiển thị nó -->
+                            <img th:if="${news.fileType.startsWith('image/')}" th:src="@{'/files/' + ${news.id}}" alt="Hình ảnh đính kèm" class="img-fluid" />
+
+                            <!-- Cung cấp một liên kết để tải xuống file đính kèm, không phân biệt loại file -->
+<!--                            <a th:href="@{'/home/news/download/' + ${news.id}}" class="btn btn-secondary">Tải xuống</a>-->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.1.6/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+
+</html>

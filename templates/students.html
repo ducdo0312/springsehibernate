@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+
+    <title>Quản lý</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+
+    <!-- CSS for Bootstrap -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
+    <!--    Css Config-->
+    <link rel="stylesheet" href="/css/home_style.css">
+
+    <!-- jQuery library -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+    <!-- Popper JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+
+    <!-- Latest JavaScript for Bootstrap 4 -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <link rel="stylesheet" href="/assets/font/themify-icons/themify-icons.css">
+
+    <script src="/js/home.js"></script>
+</head>
+<body>
+
+<div id="main">
+    <!-- Include Navbar Fragment -->
+    <div th:replace="fragments/navbar :: navbar"></div>
+
+    <div id="content">
+        <div id="header-content">
+            <div id="currentNav"></div>
+        </div>
+        <div class="main-page">
+            <div class="header-section">
+                <div class="name-header">
+                    <h5 class="listTable" th:if="${#lists.contains(roles, 'ROLE_GiangVien')}">Danh sách Sinh Viên</h5>
+                    <div class="divider"></div>
+                    <div class="phaseContent">
+                        <p th:if="${showColumn} == 'Phase1'" th:text="'Đăng ký đồ án tốt nghiệp'"></p>
+                        <p th:if="${showColumn} == 'Phase2'" th:text="'Chỉnh sửa tên đề tài'"></p>
+                        <p th:if="${showColumn} == 'Phase3'" th:text="'Phân công phản biện'"></p>
+                    </div>
+                </div>
+            </div>
+            <!-- Hiển thị thông báo lỗi gửi messages nếu có -->
+            <div th:if="${errorSendMessages}" class="alert alert-danger" role="alert">
+                <p th:text="${errorSendMessages}"></p>
+            </div>
+            <div class="content-section">
+                <div class="function-container">
+                    <form th:action="@{/students}" method="get">
+                        <label for="academicYear">Năm học:</label>
+                        <select id="academicYear" name="academicYear">
+                            <option th:value="${currentAcademicYear}"
+                                    th:selected="${selectedAcademicYear == currentAcademicYear}"
+                                    th:text="${currentAcademicYear}"></option>
+                            <option value="2022-2023" th:selected="${selectedAcademicYear == '2022-2023'}">2022-2023
+                            </option>
+                            <option value="2021-2022" th:selected="${selectedAcademicYear == '2021-2022'}">2021-2022
+                            </option>
+
+                        </select>
+
+                        <label for="semester">Học kỳ:</label>
+                        <select id="semester" name="semester">
+                            <option value="1" th:selected="${selectedSemester == 1}">Kỳ 1</option>
+                            <option value="2" th:selected="${selectedSemester == 2}">Kỳ 2</option>
+                        </select>
+                        <input type="submit" value="Tìm kiếm">
+                    </form>
+                    <!-- Sử dụng th:if để hiển thị thẻ div nếu showColumn không phải là 'Phase2' hoặc 'Phase3' -->
+                    <div class="Add-new-section" th:if="${showColumn} == 'Phase1'">
+                        <button type="button" class="btn-add-new" onclick="showInputRow()">
+                            <i class="fas fa-plus"></i>
+                            Tạo mới
+                        </button>
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <form th:action="@{/students/add}" th:object="${newStudent}" method="post">
+                        <table id="studentsTable">
+                            <thead>
+                            <tr>
+                                <th class="sticky-col first custom-size-sm">MSV</th>
+                                <th class="sticky-col second custom-size">Họ và tên</th>
+                                <th class="custom-size-sm">Ngày sinh</th>
+                                <th class="custom-size-sm">ĐTBC/TC học lại</th>
+                                <th class="custom-size-lg">Đề Tài</th>
+                                <th class="custom-size-lg"
+                                    th:if="${showColumn == 'Phase2' || showColumn == 'Phase3' || showColumn == 'all'}">
+                                    Đề tài mới
+                                </th>
+                                <th class="advisorColumn custom-size">Cán bộ hướng dẫn</th>
+                                <th class="firstAdvisorColumn custom-size" style="display: none;">Cán bộ hướng dẫn 1
+                                </th>
+                                <th class="secondAdvisorColumn custom-size" style="display: none;">Cán bộ hướng dẫn 2
+                                </th>
+                                <th class="advisorWsColumn custom-size">Nơi công tác</th>
+                                <th class="firstAdvisorWsColumn custom-size" style="display: none">Nơi công tác hướng
+                                    dẫn 1
+                                </th>
+                                <th class="secondAdvisorWsColumn custom-size" style="display: none">Nơi công tác hướng
+                                    dẫn 2
+                                </th>
+                                <th class="custom-size" th:if="${showColumn == 'Phase3' || showColumn == 'all'}">Giảng
+                                    viên phản biện 1
+                                </th>
+                                <th class="custom-size" th:if="${showColumn == 'Phase3' || showColumn == 'all'}">Nơi
+                                    công tác
+                                </th>
+                                <th class="custom-size" th:if="${showColumn == 'Phase3' || showColumn == 'all'}">Giảng
+                                    viên phản biện 2
+                                </th>
+                                <th class="custom-size" th:if="${showColumn == 'Phase3' || showColumn == 'all'}">Nơi
+                                    công tác
+                                </th>
+                                <th class="custom-size" th:if="${showColumn == 'Phase3' || showColumn == 'all'}">Đính
+                                    kèm file
+                                </th>
+                                <th class="custom-size-sm" th:if="${showColumn == 'Phase3' || showColumn == 'all'}">
+                                    Trang thái
+                                </th>
+                                <th class="sticky-col third custom-size-sm">Actions</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="student : ${studentsPage}" class="datatable"
+                                th:title="${student.secondLecturerId != null and student.secondLecturerId.equals(LecturerId) ? 'Không thể chỉnh sửa: Bạn là giảng viên thứ hai.' : ''}">
+                                <td class="sticky-col first custom-size-sm" th:text="${student.getStudentID()}"></td>
+                                <td class="sticky-col second custom-size" style="white-space: nowrap"
+                                    th:text="${student.getName()}"></td>
+                                <td class="custom-size-sm" style="white-space: nowrap"
+                                    th:text="${student.getDateOfBirth()}"></td>
+                                <td class="custom-size-sm" th:text="${student.dtbc}"></td>
+                                <td class="custom-size-lg" th:text="${student.getThesistopics()}"></td>
+                                <td class="custom-size-lg"
+                                    th:if="${showColumn == 'Phase2' || showColumn == 'Phase3' || showColumn == 'all'}"
+                                    th:text="${student.newTopics}"></td>
+
+                                <!-- Cột Cán bộ hướng dẫn (chung) -->
+                                <td th:utext="${student.getNamesecondlecturer() != null ? (student.getNamelecturer() + ' ,&lt;br&gt;' + student.getNamesecondlecturer()) : student.getNamelecturer()}"
+                                    class="advisorColumn custom-size"></td>
+                                <!-- Cột Cán bộ hướng dẫn 1 - Ban đầu ẩn -->
+                                <td th:text="${student.getNamelecturer()}" class="firstAdvisorColumn custom-size"
+                                    style="display: none;"></td>
+                                <!-- Cột Cán bộ hướng dẫn 2 - Ban đầu ẩn -->
+                                <td th:text="${student.getNamesecondlecturer()}" class="secondAdvisorColumn custom-size"
+                                    style="display: none;"></td>
+
+                                <td class="advisorWsColumn custom-size"
+                                    th:utext="${student.getSecondLecturerWorkSpace() != null ? (student.getUniversity() + ' ,&lt;br&gt;' + student.getSecondLecturerWorkSpace()) : student.getUniversity()}"></td>
+                                <td class="firstAdvisorWsColumn custom-size" th:text="${student.getUniversity()}"
+                                    style="display: none;"></td>
+                                <td class="secondAdvisorWsColumn custom-size"
+                                    th:text="${student.getSecondLecturerWorkSpace()}" style="display: none;"></td>
+                                <td class="custom-size" th:if="${showColumn == 'Phase3' || showColumn == 'all'}"
+                                    th:text="${student.lecturerReviewer}"></td>
+                                <td class="custom-size" th:if="${showColumn == 'Phase3'|| showColumn == 'all'}"
+                                    th:text="${student.lecturerReviewerWorkplace}"></td>
+                                <td class="custom-size" th:if="${showColumn == 'Phase3'|| showColumn == 'all'}"
+                                    th:text="${student.secondLecturerReviewer}"></td>
+                                <td class="custom-size" th:if="${showColumn == 'Phase3'|| showColumn == 'all'}"
+                                    th:text="${student.secondLecturerReviewerWorkplace}"></td>
+                                <td class="custom-size" th:if="${showColumn == 'Phase3'|| showColumn == 'all'}">
+                                    <span th:if="${student.filePath != null}">
+                                         <a th:href="@{/download/{id}(id=${student.ID})}"
+                                            th:text="${#strings.substring(student.filePath, student.filePath.lastIndexOf('/') + 1)}">
+                                         </a>
+                                    </span>
+                                    <span th:if="${student.filePath == null}">N/A</span>
+                                </td>
+                                <td class="custom-size-sm" th:if="${showColumn == 'Phase3'|| showColumn == 'all'}"
+                                    th:text="${student.status}"></td>
+                                <td class="sticky-col third custom-size-sm">
+                                    <a th:href="@{/students/{id}(id=${student.ID})}" class="edit"
+                                       th:unless="${student.secondLecturerId != null and student.secondLecturerId.equals(LecturerId)}"
+                                       title="Edit" data-toggle="tooltip" style="padding-left: 5px;padding-right: 5px">
+                                        <i class="fas fa-pen"></i>
+                                    </a>
+
+                                    <a href="javascript:void(0);" th:data-id="${student.getID()}"
+                                       onclick="deleteRow(this)"
+                                       th:unless="${student.secondLecturerId != null and student.secondLecturerId.equals(LecturerId)}"
+                                       class="delete" title="Delete" data-toggle="tooltip" style="padding-left: 5px;">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            <tr id="inputRow" style="display: none;">
+
+                                <td class="sticky-col first"><input type="text" class="form-control custom-size"
+                                                                    name="ID" id="IDInput" placeholder="ID"
+                                                                    th:field="*{studentID}" required></td>
+                                <td class="sticky-col second"><input type="text" class="form-control " name="name"
+                                                                     id="nameInput" placeholder="Name"
+                                                                     th:field="*{name}"></td>
+                                <td><input type="date" class="form-control custom-size-mm" name="birth" id="birthInput"
+                                           placeholder="Birth"
+                                           th:field="*{dateOfBirth}"></td>
+                                <td><input type="text" class="form-control custom-size-sm" name="DTBC" id="DTBCInput"
+                                           placeholder="DTBC"
+                                           th:field="*{dtbc}"></td>
+                                <td><input type="text" class="form-control custom-size-lg" name="topic" id="topicInput"
+                                           placeholder="topic"
+                                           th:field="*{thesistopics}"></td>
+                                <td th:if="${showColumn == 'Phase2' || showColumn == 'Phase3' || showColumn == 'all'}">
+                                    <input type="text" class="form-control " name="instructors" id="newTopicsInput"
+                                           placeholder="newTopics"
+                                           th:field="*{newTopics}"></td>
+
+                                <td>
+                                    <input type="text" class="form-control " name="instructors" id="instructorsInput"
+                                           placeholder="instructors"
+                                           th:field="*{namelecturer}" autocomplete="off">
+                                    <ul id="lecturerList" class="suggestions-list"
+                                        data-input-target="#instructorsInput"></ul>
+                                </td>
+                                <td>
+                                    <input type="text" class="form-control " name="secondInstructors"
+                                           id="secondInstructorsInput" placeholder="secondInstructors"
+                                           th:field="*{namesecondlecturer}" autocomplete="off">
+                                    <ul id="secondLecturerList" class="suggestions-list"
+                                        data-input-target="#secondInstructorsInput"></ul>
+                                </td>
+
+                                <td><input type="text" class="form-control custom-size" name="university"
+                                           id="universityInput" placeholder="university"
+                                           th:field="*{university}"></td>
+
+                                <td>
+                                    <input type="text" class="form-control custom-size" name="universitySe"
+                                           id="universitySeInput" placeholder="university"
+                                           th:field="*{secondLecturerWorkSpace}" autocomplete="off">
+                                </td>
+                                <td th:if="${showColumn == 'Phase3' || showColumn == 'all'}"><input type="text"
+                                                                                                    class="form-control "
+                                                                                                    name=""
+                                                                                                    id="lecturerReviewInput"
+                                                                                                    placeholder="lecturerReview"
+                                                                                                    th:field="*{lecturerReviewer}">
+                                </td>
+                                <td th:if="${showColumn == 'Phase3' || showColumn == 'all'}"><input type="text"
+                                                                                                    class="form-control "
+                                                                                                    name=""
+                                                                                                    id="lecturerReviewWorkSpaceInput"
+                                                                                                    placeholder="lecturerReviewWorkSpace"
+                                                                                                    th:field="*{lecturerReviewerWorkplace}">
+                                </td>
+                                <td th:if="${showColumn == 'Phase3' || showColumn == 'all'}"><input type="text"
+                                                                                                    class="form-control "
+                                                                                                    name=""
+                                                                                                    id="secondLecturerReviewInput"
+                                                                                                    placeholder="lecturerReview"
+                                                                                                    th:field="*{secondLecturerReviewer}">
+                                </td>
+                                <td th:if="${showColumn == 'Phase3' || showColumn == 'all'}"><input type="text"
+                                                                                                    class="form-control "
+                                                                                                    name=""
+                                                                                                    id="secondLecturerReviewWorkSpaceInput"
+                                                                                                    placeholder="lecturerReviewWorkSpace"
+                                                                                                    th:field="*{secondLecturerReviewerWorkplace}">
+                                </td>
+
+                                <td th:if="${showColumn == 'Phase3' || showColumn == 'all'}"><input type="text"
+                                                                                                    class="form-control "
+                                                                                                    name=""
+                                                                                                    id="statusInput"
+                                                                                                    placeholder="statusInput"
+                                                                                                    th:field="*{status}">
+                                </td>
+                                <td class="sticky-col third">
+                                    <button type="submit" class="btn btn-primary">Submit</button>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </form>
+                </div>
+
+
+                <!--                Modal thông báo thêm dữ liệu thành công-->
+                <div class="modal fade" id="successAddModal" tabindex="-1" role="dialog"
+                     aria-labelledby="successAddModalLabel" aria-hidden="true">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="successAddModalLabel">Thông báo</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                <span th:text="${successAddMessage}"></span>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-success" data-dismiss="modal">Đóng</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!--                Modal thông báo thêm dữ liệu thất bại-->
+                <div class="modal fade" id="errorAddModal" tabindex="-1" role="dialog"
+                     aria-labelledby="errorAddModalLabel" aria-hidden="true">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="errorAddModalLabel">Thông báo</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                <span th:text="${errorAddMessage}"></span>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-danger" data-dismiss="modal">Đóng</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <script th:inline="javascript">
+                    var successAddMessage = /*[[${successAddMessage}]]*/ null;
+                    var errorAddMessage = /*[[${errorAddMessage}]]*/ null;
+
+                    $(document).ready(function () {
+                        if (successAddMessage) {
+                            $('#successAddModal').modal('show');
+                        }
+                        if (errorAddMessage) {
+                            $('#errorAddModal').modal('show');
+                        }
+                    });
+                </script>
+
+
+                <!--                Modal chỉnh sửa thông tin -->
+                <div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="editStudentLabel"
+                     aria-hidden="true">
+                    <form id="updateStudentForm" enctype="multipart/form-data">
+                        <!--                        &lt;!&ndash; Thêm trường ẩn này để biến đổi yêu cầu POST thành PUT &ndash;&gt;-->
+                        <!--                        <input type="hidden" name="_method" value="put" />-->
+
+                        <!-- Thêm trường ẩn chứa CSRF token -->
+                        <input type="hidden" name="_csrf" th:value="${_csrf.token}"/>
+
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="editStudentLabel">Edit</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    <input type="hidden" id="hiddenId" name="hiddenId"/>
+                                    <div class="form-group">
+                                        <label for="IdEdit" class="col-form-label">ID:</label>
+                                        <input type="text" class="form-control" id="IdEdit" name="IdEdit"/>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="NameEdit" class="col-form-label">Name:</label>
+                                        <input type="text" class="form-control" id="NameEdit" name="NameEdit"/>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="BirthEdit" class="col-form-label">Date of Birth:</label>
+                                        <input type="date" class="form-control" id="BirthEdit" name="BirthEdit"/>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="DTBCEdit" class="col-form-label">DTBC/TC học lại:</label>
+                                        <input type="text" class="form-control" id="DTBCEdit" name="DTBCEdit"/>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="TopicEdit" class="col-form-label">Tên đề tài:</label>
+                                        <input type="text" class="form-control" id="TopicEdit" name="TopicEdit"/>
+                                    </div>
+                                    <div class="form-group"
+                                         th:if="${showColumn == 'Phase2' || showColumn == 'Phase3' || showColumn=='all'}">
+                                        <label for="NewTopicEdit" class="col-form-label">Tên đề tài mới:</label>
+                                        <input type="text" class="form-control" id="NewTopicEdit" name="NewTopicEdit"/>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="lecturerEdit" class="col-form-label">Tên giảng viên hướng dẫn
+                                            1:</label>
+                                        <input type="text" class="form-control" id="lecturerEdit" name="lecturerEdit"/>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="secondLecturerEdit" class="col-form-label">Tên giảng viên hướng dẫn
+                                            2:</label>
+                                        <input type="text" class="form-control" id="secondLecturerEdit"
+                                               name="secondLecturerEdit"/>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="UniversityEdit" class="col-form-label">Nơi công tác 1:</label>
+                                        <input type="text" class="form-control" id="UniversityEdit"
+                                               name="UniversityEdit"/>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="UniversitySeEdit" class="col-form-label">Nơi công tác 2:</label>
+                                        <input type="text" class="form-control" id="UniversitySeEdit"
+                                               name="UniversitySeEdit"/>
+                                    </div>
+                                    <div class="form-group" th:if="${showColumn == 'Phase3' || showColumn=='all' }">
+                                        <label for="lecturerReviewEdit" class="col-form-label">Giảng viên phản biện
+                                            1:</label>
+                                        <input type="text" class="form-control" id="lecturerReviewEdit"
+                                               name="lecturerReviewEdit"/>
+                                    </div>
+                                    <div class="form-group" th:if="${showColumn == 'Phase3'|| showColumn=='all' }">
+                                        <label for="lecturerReviewWorkSpaceEdit" class="col-form-label">Nơi công
+                                            tác:</label>
+                                        <input type="text" class="form-control" id="lecturerReviewWorkSpaceEdit"
+                                               name="lecturerReviewWorkSpaceEdit"/>
+                                    </div>
+                                    <div class="form-group" th:if="${showColumn == 'Phase3'|| showColumn=='all'}">
+                                        <label for="secondLecturerReviewEdit" class="col-form-label">Giảng viên phản
+                                            biện 2:</label>
+                                        <input type="text" class="form-control" id="secondLecturerReviewEdit"
+                                               name="secondLecturerReviewEdit"/>
+                                    </div>
+                                    <div class="form-group" th:if="${showColumn == 'Phase3' || showColumn=='all'}">
+                                        <label for="secondLecturerReviewWorkSpaceEdit" class="col-form-label">Nơi công
+                                            tác:</label>
+                                        <input type="text" class="form-control" id="secondLecturerReviewWorkSpaceEdit"
+                                               name="secondLecturerReviewWorkSpaceEdit"/>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="existingFilePath" class="col-form-label">File hiện tại:</label>
+                                        <span id="existingFilePath"></span>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="fileUpload" class="col-form-label">Upload File:</label>
+                                        <input type="file" class="form-control" id="fileUpload" name="fileUpload"/>
+                                    </div>
+                                    <div class="form-group" th:if="${showColumn == 'Phase3' || showColumn=='all'}">
+                                        <label for="StatusEdit" class="col-form-label">Status:</label>
+                                        <select class="form-control" id="StatusEdit" name="StatusEdit">
+                                            <option value="Đã bảo vệ">Đã bảo vệ</option>
+                                            <option value="Chưa bảo vệ">Chưa bảo vệ</option>
+                                            <!-- Add more options if required -->
+                                        </select>
+                                    </div>
+
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" id="saveButton" class="btn btn-primary">Save</button>
+                                    <button type="button" value="Cancel" class="btn btn-secondary" data-dismiss="modal">
+                                        Cancel
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <!--                Modal Thông báo chỉnh sửa thành công-->
+                <div class="modal fade" id="successEditModal" tabindex="-1" role="dialog"
+                     aria-labelledby="successEditLabel" aria-hidden="true">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="successEditLabel">Thông báo</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                Chỉnh sửa thành công!
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-danger" data-dismiss="modal">Đóng</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!--                Modal Thông báo chỉnh sửa thất bại-->
+                <div class="modal fade" id="failureModal" tabindex="-1" role="dialog" aria-labelledby="failureLabel"
+                     aria-hidden="true">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="failureLabel">Thông báo</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                Chỉnh sửa thất bại!
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-danger" data-dismiss="modal">Đóng</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <script th:inline="javascript">
+                    /*<![CDATA[*/
+                    var updateSuccess = /*[[${updateSuccess}]]*/ false;
+                    var updateFailed = /*[[${updateFailed}]]*/ false;
+
+                    $(document).ready(function () {
+                        if (updateSuccess) {
+                            $('#successEditModal').modal('show');
+                        }
+                        if (updateFailed) {
+                            $('#failureModal').modal('show');
+                        }
+                    });
+                    /*]]>*/
+                </script>
+
+                <!-- Modal thông báo gửi danh sách thành công-->
+                <div class="modal fade" id="successModal">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h4 class="modal-title">Thông Báo</h4>
+                                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                            </div>
+                            <div class="modal-body" th:text="${successMessage}"></div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-primary" data-dismiss="modal">Đóng</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <script th:inline="javascript">
+                    $(document).ready(function () {
+                        var successMessage = /*[[${successMessage}]]*/ null;
+                        if (successMessage) {
+                            $('#successModal').modal('show');
+                        }
+                    });
+                </script>
+
+
+                <!-- Nút mở modal -->
+                <div class="CsvAndSend">
+                    <button class="button-csv" onclick="exportTableToCSV('DanhSachDoAn.csv')">Xuất CSV</button>
+                    <button class="button-send" data-toggle="modal" data-target="#messageModal">Send</button>
+                    <nav style="float: right">
+                        <ul class="pagination">
+                            <li class="page-item" th:class="${!studentsPage.first} ? '':'disabled'">
+                                <a class="page-link"
+                                   th:href="@{/students?page=__${studentsPage.number - 1}__}">Trước</a>
+                            </li>
+                            <li class="page-item" th:class="${!studentsPage.last} ? '':'disabled'">
+                                <a class="page-link" th:href="@{/students?page=__${studentsPage.number+1}__}">Sau</a>
+
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+
+                <!-- Modal gửi danh sách sinh viên-->
+                <div class="modal fade" id="messageModal">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h4 class="modal-title">Gửi danh sách sinh viên</h4>
+                                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                            </div>
+
+                            <!-- Form trong modal -->
+                            <form th:action="@{/sendMessage}" method="post">
+                                <div class="modal-body">
+                                    <!-- Textarea để nhập nội dung tin nhắn -->
+                                    <textarea placeholder="title" name="messageContent" id="textareaMessageContent"
+                                              style="width: 100%"></textarea>
+
+                                    <!-- Giả sử bạn muốn gửi receiverId cố định -->
+                                    <input type="hidden" name="receiverId" th:value="${10}"/>
+                                </div>
+
+                                <div class="modal-footer">
+                                    <!-- Nút submit form -->
+                                    <button type="submit" class="btn btn-primary">Send</button>
+                                    <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+
+</html>

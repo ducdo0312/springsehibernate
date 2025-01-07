@@ -1,0 +1,44 @@
+<h2 class="text-center">[[${pageTitle}]]</h2>
+
+<div class="my-3">
+  <form th:action="@{'/students/edit/' + ${student.ID}}" th:object="${student}" method="post">
+    <div>
+      <label for="studentID">ID:</label>
+      <input type="text" id="studentID" name="name" th:field="*{student.ID}" />
+    </div>
+    <div>
+      <label for="studentName">Name:</label>
+      <input type="text" id="studentName" name="name" th:field="*{student.name}" />
+    </div>
+    <div>
+      <label for="studentDateOfBirth">Date of Birth:</label>
+      <input type="date" id="studentDateOfBirth" name="dateOfBirth" th:field="*{student.dateOfBirth}" />
+    </div>
+    <div>
+      <label for="studentThesistopics">Thesis Topics:</label>
+      <input type="text" id="studentThesistopics" name="thesistopics" th:field="*{student.thesistopics}" />
+    </div>
+    <div>
+      <label for="studentDtbc">DTBC:</label>
+      <input type="text" id="studentDtbc" name="dtbc" th:field="*{student.dtbc}" />
+    </div>
+    <div>
+      <label for="studentUniversity">University:</label>
+      <input type="text" id="studentUniversity" name="university" th:field="*{student.university}" />
+    </div>
+    <div>
+      <label for="studentNamelecturer">Name Lecturer:</label>
+      <input type="text" id="studentNamelecturer" name="namelecturer" th:field="*{student.namelecturer}" />
+    </div>
+    <!-- Các trường thông tin khác -->
+    <button type="submit">Save</button>
+  </form>
+</div>
+
+<script type="text/javascript">
+  $(document).ready(function () {
+    $("#btnCancel").on("click", function () {
+      window.location = "[[@{/tutorials}]]";
+    });
+  });
+</script>

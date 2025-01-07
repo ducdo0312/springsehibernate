@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+
+    <title>list-view</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/css/home_style.css">
+    <link rel="stylesheet" href="/assets/font/themify-icons/themify-icons.css">
+
+
+</head>
+<body>
+<script src="/js/home.js">
+</script>
+<div id="main">
+    <!-- Include Navbar Fragment -->
+    <div th:replace="fragments/navbar :: navbar"></div>
+
+    <div id = "content">
+        <div id="header-content">
+            <div id="currentNav"></div>
+        </div>
+        <div class="main-page">
+            <div class="header-section">
+                <div class="name-header">
+                    <h5 class="listTable">Danh sách Sinh Viên</h5>
+                    <div class="divider"></div>
+                    <div class="phaseContent">
+                        <p th:if="${showColumn} == 'Phase1'" th:text="'Đăng ký đồ án tốt nghiệp'"></p>
+                        <p th:if="${showColumn} == 'Phase2'" th:text="'Chỉnh sửa tên đề tài'"></p>
+                        <p th:if="${showColumn} == 'Phase3'" th:text="'Phân công phản biện'"></p>
+                    </div>
+                </div>
+            </div>
+            <div class="content-section">
+
+                <div class="table-container">
+                    <table id="studentsTable">
+                        <thead>
+                        <tr>
+                            <th class="sticky-col first custom-size-sm">MSV</th>
+                            <th class="sticky-col second custom-size">Họ và tên</th>
+                            <th class="custom-size-sm">Ngày sinh</th>
+                            <th class="custom-size-sm">ĐTBC/TC học lại</th>
+                            <th class="custom-size-lg">Đề Tài</th>
+                            <th class="custom-size-lg" th:if="${showColumn == 'Phase2' || showColumn == 'Phase3' || showColumn == 'all'}" >Đề tài mới</th>
+                            <th class="advisorColumn custom-size">Cán bộ hướng dẫn</th>
+                            <!--                        <th class="firstAdvisorColumn custom-size" style="display: none;">Cán bộ hướng dẫn 1</th>-->
+                            <!--                        <th class="secondAdvisorColumn custom-size" style="display: none;">Cán bộ hướng dẫn 2</th>-->
+                            <th class="custom-size">Nơi công tác</th>
+                            <th class="custom-size" th:if="${showColumn == 'Phase3' || showColumn == 'all'}">Giảng viên phản biện 1</th>
+                            <th class="custom-size" th:if="${showColumn == 'Phase3' || showColumn == 'all'}">Nơi công tác</th>
+                            <th class="custom-size" th:if="${showColumn == 'Phase3' || showColumn == 'all'}">Giảng viên phản biện 2</th>
+                            <th class="custom-size" th:if="${showColumn == 'Phase3' || showColumn == 'all'}">Nơi công tác</th>
+                            <th class="custom-size" th:if="${showColumn == 'Phase3' || showColumn == 'all'}">Đính
+                                kèm file
+                            </th>
+                            <th class="custom-size-sm" th:if="${showColumn == 'Phase3' || showColumn == 'all'}">Trang thái</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="student : ${confirmList}">
+                            <td class="sticky-col first custom-size-sm" th:text="${student.studentID}"></td>
+                            <td class="sticky-col second custom-size" style="white-space: nowrap" th:text="${student.getName()}"></td>
+                            <td  class="custom-size-sm" style="white-space: nowrap" th:text="${student.getDateOfBirth()}"></td>
+                            <td  class="custom-size-sm" th:text="${student.dtbc}"></td>
+                            <td  class="custom-size-lg" th:text="${student.getThesistopics()}"></td>
+                            <td class="custom-size-lg" th:if="${showColumn == 'Phase2' || showColumn == 'Phase3' || showColumn == 'all'}" th:text="${student.newTopics}"></td>
+
+                            <!-- Cột Cán bộ hướng dẫn (chung) -->
+                            <td th:utext="${student.getNamelecturer()} +' ,&lt;br&gt;' + ${student.getNamesecondlecturer()}" class="advisorColumn custom-size"></td>
+                            <td class="custom-size" th:text="${student.getUniversity()}"></td>
+                            <td class="custom-size" th:if="${showColumn == 'Phase3' || showColumn == 'all'}" th:text="${student.lecturerReviewer}"></td>
+                            <td class="custom-size" th:if="${showColumn == 'Phase3'|| showColumn == 'all'}" th:text="${student.lecturerReviewerWorkplace}"></td>
+                            <td class="custom-size" th:if="${showColumn == 'Phase3'|| showColumn == 'all'}" th:text="${student.secondLecturerReviewer}"></td>
+                            <td class="custom-size" th:if="${showColumn == 'Phase3'|| showColumn == 'all'}" th:text="${student.secondLecturerReviewerWorkplace}"></td>
+                            <td class="custom-size" th:if="${showColumn == 'Phase3'|| showColumn == 'all'}">
+                                    <span th:if="${student.filePath != null}">
+                                         <a th:href="@{/khoa/download/{id}(id=${student.id})}"
+                                            th:text="${#strings.substring(student.filePath, student.filePath.lastIndexOf('/') + 1)}">
+                                         </a>
+                                    </span>
+                                <span th:if="${student.filePath == null}">N/A</span>
+                            </td>
+                            <td class="custom-size-sm" th:if="${showColumn == 'Phase3'|| showColumn == 'all'}" th:text="${student.status}"></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+
+</html>

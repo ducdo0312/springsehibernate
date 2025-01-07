@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Danh sách sinh viên đủ điều kiện đã xác nhận</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="/css/home_style.css">
+    <link rel="stylesheet" href="/assets/font/themify-icons/themify-icons.css">
+
+
+</head>
+<body>
+<script src="/js/home.js">
+</script>
+<div id="main">
+    <!-- Include Navbar Fragment -->
+    <div th:replace="fragments/navbar :: navbar"></div>
+
+    <div id = "content">
+        <div id="currentNav"></div>
+        <div class="main-page">
+            <div class="header-section">
+                <div class="name-header">
+                    <h5 style="color: #083761">Danh sách bảng đã xác nhận</h5>
+                </div>
+            </div>
+            <div class="content-section">
+                <div class="function-container">
+                    <form th:action="@{/khoa/upload-success}" method="get">
+                        <div>
+                            <label for="academicYear">Năm học:</label>
+                            <select id="academicYear" name="academicYear" required>
+                                <option th:each="year : ${academicYears}"
+                                        th:value="${year}"
+                                        th:selected="${year.equals(selectedYear)}"
+                                        th:text="${year}">
+                                </option>
+                            </select>
+
+                            <label for="semester">Học kỳ:</label>
+                            <select id="semester" name="semester">
+                                <option value="1" th:selected="${selectedSemester == 1}">Kỳ 1</option>
+                                <option value="2" th:selected="${selectedSemester == 2}">Kỳ 2</option>
+                            </select>
+                            <input type="submit" value="Tìm kiếm">
+                        </div>
+                    </form>
+                </div>
+
+                <div th:if="${confirmedGraduates}">
+                    <table>
+                        <thead>
+                        <tr>
+                            <th>Mã SV</th>
+                            <th>Họ và tên</th>
+                            <th>Ngày sinh</th>
+                            <th>Lớp</th>
+                            <th>TCTL</th>
+                            <th>TBC</th>
+                            <th>Năm học</th>
+                            <th>Kỳ Học</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="graduate : ${confirmedGraduates}">
+                            <td th:text="${graduate.studentId}"></td>
+                            <td th:text="${graduate.name}"></td>
+                            <td th:text="${graduate.dateOfBirth}"></td>
+                            <td th:text="${graduate.nameClass}"></td>
+                            <td th:text="${graduate.accumulatedCredits}"></td>
+                            <td th:text="${graduate.tbc}"></td>
+                            <td th:text="${graduate.academicYear}"></td>
+                            <td th:text="${graduate.semester}"></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <nav style="float: right" th:if="${confirmedGraduates.hasContent}">
+                    <ul class="pagination">
+                        <li class="page-item" th:class="${!confirmedGraduates.first} ? '':'disabled'">
+                            <a class="page-link" th:href="@{/khoa/upload-success(page=${confirmedGraduates.number - 1}, academicYear=${selectedYear}, semester=${selectedSemester})}">Trước</a>
+                        </li>
+                        <!-- Các nút phân trang số... -->
+                        <li class="page-item" th:class="${!confirmedGraduates.last} ? '':'disabled'">
+                            <a class="page-link" th:href="@{/khoa/upload-success(page=${confirmedGraduates.number + 1}, academicYear=${selectedYear}, semester=${selectedSemester})}">Sau</a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+
+</html>

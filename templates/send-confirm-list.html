@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confirm List Student</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/css/home_style.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="/assets/font/themify-icons/themify-icons.css">
+
+    <link rel="stylesheet" href="/css/home_style.css">
+    <link rel="stylesheet" href="/assets/font/themify-icons/themify-icons.css">
+
+</head>
+<body>
+<script src="/js/home.js">
+</script>
+<div style="position: relative; top: -23px" id="main">
+    <!-- Include Navbar Fragment -->
+    <div th:replace="fragments/navbar :: navbar"></div>
+
+    <div id = "content">
+        <div id="header-content">
+            <div id="currentNav"></div>
+        </div>
+        <div class="main-page">
+            <div class="header-section">
+                <div class="name-header">
+                    <h5 class="listTable">Danh sách Sinh Viên</h5>
+                    <div class="divider"></div>
+                    <div class="phaseContent">
+                        <p th:if="${showColumn} == 'Phase1'" th:text="'Đăng ký đồ án tốt nghiệp'"></p>
+                        <p th:if="${showColumn} == 'Phase2'" th:text="'Chỉnh sửa tên đề tài'"></p>
+                        <p th:if="${showColumn} == 'Phase3'" th:text="'Phân công phản biện'"></p>
+                    </div>
+                </div>
+            </div>
+            <div class="content-section">
+                <!-- Hiển thị thông báo lỗi gửi messages nếu có -->
+                <div th:if="${errorSendMessages}" class="alert alert-danger" role="alert">
+                    <p th:text="${errorSendMessages}"></p>
+                </div>
+                <div class="table-container">
+                    <table id="studentsTable">
+                        <thead>
+                        <tr>
+                            <th class="sticky-col first custom-size-sm">MSV</th>
+                            <th class="sticky-col second custom-size">Họ và tên</th>
+                            <th class="custom-size-sm">Ngày sinh</th>
+                            <th class="custom-size-sm">ĐTBC/TC học lại</th>
+                            <th class="custom-size-lg">Đề Tài</th>
+                            <th class="custom-size-lg" th:if="${showColumn == 'Phase2' || showColumn == 'Phase3' || showColumn == 'all'}" >Đề tài mới</th>
+                            <th class="advisorColumn custom-size">Cán bộ hướng dẫn</th>
+                            <!--                        <th class="firstAdvisorColumn custom-size" style="display: none;">Cán bộ hướng dẫn 1</th>-->
+                            <!--                        <th class="secondAdvisorColumn custom-size" style="display: none;">Cán bộ hướng dẫn 2</th>-->
+                            <th class="custom-size">Nơi công tác</th>
+                            <th class="custom-size" th:if="${showColumn == 'Phase3' || showColumn == 'all'}">Giảng viên phản biện 1</th>
+                            <th class="custom-size" th:if="${showColumn == 'Phase3' || showColumn == 'all'}">Nơi công tác</th>
+                            <th class="custom-size" th:if="${showColumn == 'Phase3' || showColumn == 'all'}">Giảng viên phản biện 2</th>
+                            <th class="custom-size" th:if="${showColumn == 'Phase3' || showColumn == 'all'}">Nơi công tác</th>
+                            <th class="custom-size" th:if="${showColumn == 'Phase3' || showColumn == 'all'}">Đính
+                                kèm file
+                            </th>
+                            <th class="custom-size-sm" th:if="${showColumn == 'Phase3' || showColumn == 'all'}">Trang thái</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <!-- Lặp qua danh sách sinh viên đã xác nhận -->
+                        <tr th:each="student : ${confirmedStudents}">
+                            <td class="sticky-col first custom-size-sm" th:text="${student.getStudentID()}"></td>
+                            <td class="sticky-col second custom-size" style="white-space: nowrap" th:text="${student.getName()}"></td>
+                            <td  class="custom-size-sm" style="white-space: nowrap" th:text="${student.getDateOfBirth()}"></td>
+                            <td  class="custom-size-sm" th:text="${student.dtbc}"></td>
+                            <td  class="custom-size-lg" th:text="${student.getThesistopics()}"></td>
+                            <td class="custom-size-lg" th:if="${showColumn == 'Phase2' || showColumn == 'Phase3' || showColumn == 'all'}" th:text="${student.newTopics}"></td>
+
+                            <!-- Cột Cán bộ hướng dẫn (chung) -->
+                            <td th:utext="${student.getNamelecturer()} +' ,&lt;br&gt;' + ${student.getNamesecondlecturer()}" class="advisorColumn custom-size"></td>
+                            <!--                        &lt;!&ndash; Cột Cán bộ hướng dẫn 1 - Ban đầu ẩn &ndash;&gt;-->
+                            <!--                        <td th:text="${student.getNamelecturer()}" class="firstAdvisorColumn custom-size" style="display: none;"></td>-->
+
+                            <!--                        &lt;!&ndash; Cột Cán bộ hướng dẫn 2 - Ban đầu ẩn &ndash;&gt;-->
+                            <!--                        <td th:text="${student.getNamesecondlecturer()}" class="secondAdvisorColumn custom-size" style="display: none;"></td>-->
+
+                            <td class="custom-size" th:text="${student.getUniversity()}"></td>
+                            <td class="custom-size" th:if="${showColumn == 'Phase3' || showColumn == 'all'}" th:text="${student.lecturerReviewer}"></td>
+                            <td class="custom-size" th:if="${showColumn == 'Phase3'|| showColumn == 'all'}" th:text="${student.lecturerReviewerWorkplace}"></td>
+                            <td class="custom-size" th:if="${showColumn == 'Phase3'|| showColumn == 'all'}" th:text="${student.secondLecturerReviewer}"></td>
+                            <td class="custom-size" th:if="${showColumn == 'Phase3'|| showColumn == 'all'}" th:text="${student.secondLecturerReviewerWorkplace}"></td>
+                            <td class="custom-size" th:if="${showColumn == 'Phase3' || showColumn == 'all'}">
+                                <span th:if="${student.filePath != null}">
+                                    <a th:if="${#lists.contains(roles, 'ROLE_BoMon')}" th:href="@{/bo-mon/send-confirm-list/download/{id}(id=${student.id})}"
+                                       th:text="${#strings.substring(student.filePath, student.filePath.lastIndexOf('/') + 1)}"></a>
+                                    <a th:if="${#lists.contains(roles, 'ROLE_Khoa')}" th:href="@{/khoa/download/{id}(id=${student.id})}"
+                                       th:text="${#strings.substring(student.filePath, student.filePath.lastIndexOf('/') + 1)}"></a>
+                                </span>
+                                <span th:if="${student.filePath == null}">N/A</span>
+                            </td>
+
+                            <td class="custom-size-sm" th:if="${showColumn == 'Phase3'|| showColumn == 'all'}" th:text="${student.status}"></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Modal thông báo -->
+                <div class="modal fade" id="successModal">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h4 class="modal-title">Thông Báo</h4>
+                                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                            </div>
+                            <div class="modal-body" th:text="${successMessage}"></div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-primary" data-dismiss="modal">Đóng</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <script th:inline="javascript">
+                    $(document).ready(function() {
+                        var successMessage = /*[[${successMessage}]]*/ null;
+                        if (successMessage) {
+                            $('#successModal').modal('show');
+                        }
+                    });
+                </script>
+                <!-- Nút mở modal -->
+                <div class="CsvAndSend">
+                    <button class="button-csv" onclick="exportTableToCSV('DanhSachDoAn.csv')">Xuất CSV</button>
+                    <button th:if="${!#lists.contains(roles, 'ROLE_Khoa')}" class="button-send" data-toggle="modal" data-target="#messageModal">Send</button>
+                </div>
+
+                <!-- Modal -->
+                <div class="modal fade" id="messageModal">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h4 class="modal-title">Gửi danh sách sinh viên</h4>
+                                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                            </div>
+
+                            <!-- Form trong modal -->
+                            <form th:action="@{/bo-mon/send-confirm-list}" method="post">
+                            <div class="modal-body">
+                                    <!-- Textarea để nhập nội dung tin nhắn -->
+                                    <textarea placeholder="title" name="messageContent" id="textareaMessageContent" style="width: 100%"></textarea>
+
+                                    <!-- Giả sử bạn muốn gửi receiverId cố định, bạn có thể thêm input ẩn tại đây -->
+                                    <input type="hidden" name="receiverId" th:value="${1}" />
+                                </div>
+
+                                <div class="modal-footer">
+                                    <!-- Nút submit form -->
+                                    <button type="submit" class="btn btn-primary">Send</button>
+                                    <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+
+</html>
